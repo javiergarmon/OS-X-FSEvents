@@ -1,8 +1,10 @@
 
-/* Compile with con gcc -framework CoreServices main.c -o main_c */
+/* Compile with con gcc -framework CoreServices -lstdc++ main.cpp -o main */
 
-#include <stdlib.h>
+#include <iostream>
 #include <CoreServices/CoreServices.h>
+
+using namespace std;
 
 int eventModified = kFSEventStreamEventFlagItemFinderInfoMod |
                     kFSEventStreamEventFlagItemModified |
@@ -34,14 +36,14 @@ void myCallbackFunction(
 ){
     
     int i;
-    char **paths = eventPaths;
+    char **paths = (char **)eventPaths;
     
     for( i=0; i < numEvents; i++ ){
         
-        printf( "Changed %s\n", paths[i] );
-        printf( "  Modified : %d\n", !!( eventFlags[i] & eventModified ) );
-        printf( "  Renamed  : %d\n", !!( eventFlags[i] & eventRenamed  ) );
-        printf( "  System   : %d\n", !!( eventFlags[i] & eventSystem   ) );
+        cout << "Changed " << endl << paths[i];
+        cout << "  Modified : " << !!( eventFlags[i] & eventModified ) << endl;
+        cout << "  Renamed  : " << !!( eventFlags[i] & eventRenamed  ) << endl;
+        cout << "  System   : " << !!( eventFlags[i] & eventSystem   ) << endl;
 
     }
 
@@ -50,10 +52,9 @@ void myCallbackFunction(
 int main( int argc, char* argv[] ){
 
     /* Define variables and create a CFArray object containing CFString objects containing paths to watch. */
-    CFStringRef mypath      = CFStringCreateWithCString( NULL, argv[ 1 ], kCFStringEncodingUTF8);
-    CFArrayRef pathsToWatch = CFArrayCreate( NULL, ( const void ** ) &mypath, 1, NULL );
-    void *callbackInfo      = NULL; // could put stream-specific data here. FSEventStreamRef stream;*/
-    CFAbsoluteTime latency  = 3.0; /* Latency in seconds */
+    CFStringRef mypath              = CFStringCreateWithCString( NULL, argv[ 1 ], kCFStringEncodingUTF8);
+    CFArrayRef pathsToWatch         = CFArrayCreate( NULL, ( const void ** ) &mypath, 1, NULL );
+    CFAbsoluteTime latency          = 3.0; /* Latency in seconds */
     FSEventStreamRef stream;
 
     /* Create the stream, passing in a callback */
@@ -61,7 +62,7 @@ int main( int argc, char* argv[] ){
 
         NULL,
         &myCallbackFunction,
-        callbackInfo,
+        NULL, // could put stream-specific data here. FSEventStreamRef stream;*/
         pathsToWatch,
         kFSEventStreamEventIdSinceNow, /* Or a previous event ID */
         latency,
